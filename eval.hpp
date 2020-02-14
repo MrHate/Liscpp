@@ -7,6 +7,10 @@
 
 #include "types.hpp"
 
+namespace LISP {
+	const Atom* eval(const Exp*);
+} //namespace LISP
+
 namespace {
 
 using namespace LISP;
@@ -25,15 +29,38 @@ public:
 	}
 };
 
-Atom* eval_if(const List& list) {
-	return nullptr;
+const Atom* eval_if(const List& list) {
+	assert(list.size() == 4);
+	const NumAtom* comp = dynamic_cast<const NumAtom*>(eval(list[1]));
+	return comp->val? eval(list[2]): eval(list[3]);
 }
 
 void eval_define(const List& list) {
 
 }
 
-Atom* eval_proc(std::string oper, const List& list) {
+const Atom* eval_proc(const std::string oper, const List& list) {
+	if(oper == "+") {
+		assert(list.size() == 3);
+		const NumAtom *lhs = dynamic_cast<const NumAtom*>(eval(list[1])), *rhs = dynamic_cast<const NumAtom*>(eval(list[2]));
+		assert(lhs && rhs);
+		return new NumAtom(lhs->val + rhs->val);
+	}
+	else if(oper == "-") {
+		assert(list.size() == 3);
+		const NumAtom *lhs = dynamic_cast<const NumAtom*>(eval(list[1])), *rhs = dynamic_cast<const NumAtom*>(eval(list[2]));
+		return new NumAtom(lhs->val - rhs->val);
+	}
+	else if(oper == "*") {
+		assert(list.size() == 3);
+		const NumAtom *lhs = dynamic_cast<const NumAtom*>(eval(list[1])), *rhs = dynamic_cast<const NumAtom*>(eval(list[2]));
+		return new NumAtom(lhs->val * rhs->val);
+	}
+	else if(oper == "/") {
+		assert(list.size() == 3);
+		const NumAtom *lhs = dynamic_cast<const NumAtom*>(eval(list[1])), *rhs = dynamic_cast<const NumAtom*>(eval(list[2]));
+		return new NumAtom(lhs->val / rhs->val);
+	}
 	return nullptr;
 }
 
@@ -41,13 +68,20 @@ Atom* eval_proc(std::string oper, const List& list) {
 
 namespace LISP {
 
-const Atom* eval(Exp* e) {
+const Atom* eval(const Exp* e) {
+	if(!e) return nullptr;
 	if(e->kind == Exp::ATOM) return dynamic_cast<const AtomExp*>(e)->a;
 
-	const List& list = dynamic_cast<ListExp*>(e)->list;
+	const List& list = dynamic_cast<const ListExp*>(e)->list;
 	const Atom* head = eval(list[0]);
+	if(list.size() == 1) return head;
+
 	assert(head->kind == Atom::SYM);
 	const std::string oper = dynamic_cast<const SymbolAtom*>(head)->name;
+
+	if(oper == "if") return eval_if(list);
+	else if(oper == "define") eval_define(list);
+	else return eval_proc(oper, list);
 
 	return nullptr;
 }

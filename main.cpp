@@ -14,7 +14,11 @@ int main(int argc, char *argv[]) {
 	}
 
 	LISP::Parser parser(argv[1]);
+	cout << "Parser.print: " << endl;
 	parser.print(std::cout);
+	cout << endl;
+
+	LISP::eval(parser.get())->print(cout);
 
 	return 0;
 
