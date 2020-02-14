@@ -46,6 +46,7 @@ class Env {
 		// TODO: append
 
 		name2exp.push_back(builtins);
+		name2exp.push_back(Dict());
 	}
 
 public:
@@ -126,9 +127,13 @@ const Atom* eval(const Exp* e) {
 		case Exp::LIST:
 			{
 				const List& list = dynamic_cast<const ListExp*>(e)->list;
-				const Atom* head = eval_atom_front(list[0]);
-				if(list.size() == 1) return head;
 
+				// I treat empty list as zero
+				if(list.empty()) return new NumAtom(0);
+				// To evaluate lists of single element like "(k)"
+				if(list.size() == 1) return eval_atom(list[0]);
+
+				const Atom* head = eval_atom_front(list[0]);
 				if(head->kind == Atom::SYM) {
 					const std::string oper = dynamic_cast<const SymbolAtom*>(head)->name;
 					if(oper == "if") return eval_if(list);

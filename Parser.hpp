@@ -55,9 +55,9 @@ class Parser {
 				Atom* a = nullptr;
 				if(token[0] == '"')
 					a = new StringAtom(token.substr(1, token.size() - 2));
-				else if(isdigit(token[0]))
+				else if((token.size() > 1 && (token[0] == '-' || token[0] == '+')) || isdigit(token[0]))
 					a = new NumAtom(std::stod(token));
-				else if(token[0] != '\0')
+				else if(token[0] != '\0')	// '\0' will be regarded as symbol
 					a = new SymbolAtom(token);
 				else continue;
 
