@@ -2,7 +2,7 @@
 #include <string>
 
 #include "Parser.hpp"
-//#include "eval.hpp"
+#include "eval.hpp"
 
 using namespace std;
 
@@ -18,9 +18,9 @@ int main(int argc, char *argv[]) {
 	parser.print(std::cout);
 	cout << endl;
 
-	//cout << "Result: " << endl;
-	//LISP::eval(parser.get())->print(cout);
-	//cout << endl;
+	cout << "Result: " << endl;
+	LISP::eval(parser.get())->print(cout);
+	cout << endl;
 
 	return 0;
 

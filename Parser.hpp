@@ -19,17 +19,22 @@ class Parser {
 
 	void tokenize(std::string& s){
 
-		//trim
-		s.erase(0, s.find_first_not_of(" "));
-		s.erase(s.find_last_not_of(" ") + 1);
-		
 		// insert spaces before and after each parenthesis
 		std::regex re("\\(|\\)");
 		s = std::regex_replace(s, re, " $& ");
 
+		//trim
+		s.erase(0, s.find_first_not_of(" "));
+		s.erase(s.find_last_not_of(" ") + 1);
+
 	}
 
 	void parenthesize(std::vector<std::string>& tokens){
+		//std::cout << "Tokens: " << std::endl;
+		//for(std::string& s: tokens)
+		//  std::cout << s << " | ";
+		//std::cout << std::endl;
+
 		std::stack<List> listStack;
 
 		List curList;
@@ -52,12 +57,14 @@ class Parser {
 					a = new StringAtom(token.substr(1, token.size() - 2));
 				else if(isdigit(token[0]))
 					a = new NumAtom(std::stod(token));
-				else 
+				else if(token[0] != '\0')
 					a = new SymbolAtom(token);
+				else continue;
 
 				curList.push_back(a);
 			}
 		
+		//assert(curList.size() == 1);
 		root = new ListExp(curList);
 
 	}
@@ -74,7 +81,7 @@ public:
 
 			while(1){
 				char c = fin.get();
-				if(c == EOF) break;
+				if(fin.eof()) break;
 				sourceFile.push_back(c);
 			}
 		}
