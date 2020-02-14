@@ -12,12 +12,8 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	Parser parser(argv[1]);
-	while(1) {
-		string s = parser.nextAtom();
-		if(parser.eof()) break;
-		cout << s;
-	}
+	LISP::Parser parser(argv[1]);
+	parser.print();
 
 	return 0;
 
