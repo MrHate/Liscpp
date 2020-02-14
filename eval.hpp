@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <any>
+#include <cmath>
 
 #include "types.hpp"
 
@@ -14,10 +15,12 @@ namespace LISP {
 
 namespace {
 
+static int def_depth = 0;
+
 using namespace LISP;
 
 class Env {
-	using Func = std::function<Atom*(const List&)>;
+	using Func = std::function<const Atom*(const List&)>;
 	using Dict = std::map<std::string, Func>;
 
 	std::vector<Dict> name2exp;
@@ -33,6 +36,10 @@ class Env {
 		builtins[">="] = [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval(list[1]))->val >= dynamic_cast<const NumAtom*>(eval(list[2]))->val); };
 		builtins["<="] = [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval(list[1]))->val <= dynamic_cast<const NumAtom*>(eval(list[2]))->val); };
 		builtins["="] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval(list[1]))->val == dynamic_cast<const NumAtom*>(eval(list[2]))->val); };
+		builtins["abs"] =  [](const List& list) { return new NumAtom(std::abs(dynamic_cast<const NumAtom*>(eval(list[1]))->val)); };
+		builtins["max"] =  [](const List& list) { return new NumAtom(std::max(dynamic_cast<const NumAtom*>(eval(list[1]))->val, dynamic_cast<const NumAtom*>(eval(list[2]))->val)); };
+		builtins["min"] =  [](const List& list) { return new NumAtom(std::min(dynamic_cast<const NumAtom*>(eval(list[1]))->val, dynamic_cast<const NumAtom*>(eval(list[2]))->val)); };
+		// TODO: append
 
 		name2exp.push_back(builtins);
 	}
@@ -43,9 +50,9 @@ public:
 		return _env;
 	}
 
-	//void enter(std::string name, Exp* e) { name2exp.back()[name] = e; }
-	//void beginScope() { name2exp.push_back(Dict()); }
-	//void endScope() { assert(name2exp.size() > 1); name2exp.resize(name2exp.size() - 1); }
+	void enter(std::string name, const Func f) { name2exp.back()[name] = f; }
+	void beginScope() { name2exp.push_back(Dict()); }
+	void endScope() { assert(name2exp.size() > 1); name2exp.resize(name2exp.size() - 1); }
 	const Func& lookup(std::string name) const {
 		for(auto i = name2exp.rbegin(); i != name2exp.rend(); ++i)
 			if(i->count(name)) return i->at(name);
@@ -59,13 +66,33 @@ const Atom* eval_if(const List& list) {
 	return comp->val? eval(list[2]): eval(list[3]);
 }
 
-void eval_define(const List& list) {
-
+const Atom* eval_define(const List& list) {
+	assert(list.size() == 3);
+	const std::string symbol = dynamic_cast<const SymbolAtom*>(dynamic_cast<const AtomExp*>(list[1])->a)->name;
+	const NumAtom* val = dynamic_cast<const NumAtom*>(eval(list[2]));
+	Env::getEnv().enter(symbol, [val](const List& list) { return val; });
+	return val;
 }
 
 const Atom* eval_proc(const std::string oper, const List& list) {
 	return Env::getEnv().lookup(oper)(list);
 }
+
+const Atom* eval_atom(const Atom* a) {
+	switch(a->kind) {
+		case Atom::SYM:
+			{
+				const std::string symbol = dynamic_cast<const SymbolAtom*>(a)->name;
+				if(symbol == "define" || symbol == "if") return a;
+				return Env::getEnv().lookup(symbol)(List());
+			}
+		case Atom::NUM:
+			return a;
+		default:
+			assert(0);
+	}
+}
+
 
 } // anonymous namespace
 
@@ -73,20 +100,25 @@ namespace LISP {
 
 const Atom* eval(const Exp* e) {
 	if(!e) return nullptr;
-	if(e->kind == Exp::ATOM) return dynamic_cast<const AtomExp*>(e)->a;
+	if(e->kind == Exp::ATOM) return eval_atom(dynamic_cast<const AtomExp*>(e)->a);
 
 	const List& list = dynamic_cast<const ListExp*>(e)->list;
 	const Atom* head = eval(list[0]);
 	if(list.size() == 1) return head;
 
-	assert(head->kind == Atom::SYM);
-	const std::string oper = dynamic_cast<const SymbolAtom*>(head)->name;
+	if(head->kind == Atom::SYM) {
+		const std::string oper = dynamic_cast<const SymbolAtom*>(head)->name;
 
-	if(oper == "if") return eval_if(list);
-	else if(oper == "define") eval_define(list);
-	else return eval_proc(oper, list);
+		if(oper == "if") return eval_if(list);
+		else if(oper == "define") return eval_define(list);
+		else return eval_proc(oper, list);
+	}
+	else {
+		const Atom* ret = head;
+		for(int i=1; i<list.size(); ++i) ret = eval(list[i]);
+		return ret;
+	}
 
-	return nullptr;
 }
 
 } // namespace LISP

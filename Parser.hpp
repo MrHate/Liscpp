@@ -30,32 +30,21 @@ class Parser {
 	}
 
 	void parenthesize(std::vector<std::string>& tokens){
-		std::stack<Exp*> operStack;
 		std::stack<List> listStack;
 
-		Exp* curOper = nullptr;
 		List curList;
 
 		for(std::string& token: tokens) 
 			if(token == "(") {
-				operStack.push(curOper);
 				listStack.push(curList);
 
-				curOper = nullptr;
 				curList.clear();
 			}
 			else if (token == ")") {
-				assert(operStack.size() > 0);
-				Exp* pe = nullptr;
-				if(curList.size()) {
-					curList.insert(curList.begin(), curOper);
-					pe = new ListExp(curList);
-				}
-				else pe = curOper;
-
-				curOper = operStack.top(); operStack.pop();
+				assert(listStack.size() > 0);
+				Exp* pe = new ListExp(curList);
 				curList = listStack.top(); listStack.pop();
-				curList.push_back(pe);
+				curList.push_back(new ExpAtom(pe));
 			}
 			else {
 				Atom* a = nullptr;
@@ -66,8 +55,7 @@ class Parser {
 				else 
 					a = new SymbolAtom(token);
 
-				if(!curOper) curOper = new AtomExp(a);
-				else curList.push_back(new AtomExp(a));
+				curList.push_back(a);
 			}
 		
 		root = new ListExp(curList);
