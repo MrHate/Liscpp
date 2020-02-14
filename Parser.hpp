@@ -1,7 +1,7 @@
 #ifndef _LISP_INCLUDE_PARSER
 #define _LISP_INCLUDE_PARSER
 
-#include <iosfwd>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -30,10 +30,10 @@ class Parser {
 	}
 
 	void parenthesize(std::vector<std::string>& tokens){
-		//std::cout << "Tokens: " << std::endl;
-		//for(std::string& s: tokens)
-		//  std::cout << s << " | ";
-		//std::cout << std::endl;
+		std::cout << "Tokens: " << std::endl;
+		for(std::string& s: tokens)
+			std::cout << s << " | ";
+		std::cout << std::endl;
 
 		std::stack<List> listStack;
 
@@ -53,8 +53,10 @@ class Parser {
 			}
 			else {
 				Atom* a = nullptr;
-				if(token[0] == '"')
+				if(token[0] == '"'){
+					//std::cout << token << std::endl;
 					a = new StringAtom(token.substr(1, token.size() - 2));
+				}
 				else if((token.size() > 1 && (token[0] == '-' || token[0] == '+')) || isdigit(token[0]))
 					a = new NumAtom(std::stod(token));
 				else if(token[0] != '\0')	// '\0' will be regarded as symbol

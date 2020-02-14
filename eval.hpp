@@ -22,7 +22,6 @@ const Atom* eval_atom(const Atom*);
 
 static int def_depth = 0;
 
-
 class Env {
 	using Func = std::function<const Atom*(const List&)>;
 	using Dict = std::map<std::string, Func>;
@@ -43,7 +42,27 @@ class Env {
 		builtins["abs"] =  [](const List& list) { return new NumAtom(std::abs(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val)); };
 		builtins["max"] =  [](const List& list) { return new NumAtom(std::max(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val, dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val)); };
 		builtins["min"] =  [](const List& list) { return new NumAtom(std::min(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val, dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val)); };
+		builtins["expr"] =  [](const List& list) { return new NumAtom(std::pow(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val, dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val)); };
+		builtins["eq?"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val == dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
+		builtins["equal?"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val == dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
+		builtins["not"] =  [](const List& list) { return new NumAtom(!(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val)); };
+		builtins["rount"] =  [](const List& list) { return new NumAtom(std::round(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val)); };
 		// TODO: append
+		// TODO: apply
+		// TODO: begin
+		builtins["car"] = [](const List& list) { return dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list[0]; };
+		// TODO: cdr
+		// TODO: cons
+		builtins["null?"] = [](const List& list) { return new NumAtom(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list.empty()); };
+		builtins["length"] = [](const List& list) { return new NumAtom(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list.size()); };
+		// TODO: list
+		builtins["list?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::EXP); };
+		// TODO: map
+		builtins["print"] =  [](const List& list) { eval_atom(list[1])->print(std::cout); return new NumAtom(0); };
+		builtins["println"] =  [](const List& list) { eval_atom(list[1])->print(std::cout); std::cout << std::endl; return new NumAtom(0); };
+		builtins["number?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::NUM); };
+		// TODO: procedure?
+		builtins["symbol?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::SYM); };
 
 		name2exp.push_back(builtins);
 		name2exp.push_back(Dict());
@@ -109,6 +128,8 @@ const Atom* eval_atom(const Atom* a) {
 			return a;
 		case Atom::EXP:
 			return eval(dynamic_cast<const ExpAtom*>(a)->exp);
+		case Atom::STR:
+			return a;
 		default:
 			assert(0);
 	}

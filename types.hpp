@@ -32,28 +32,28 @@ class NumAtom: public Atom {
 public:
 	const double val;
 	explicit NumAtom(double val): Atom(Atom::NUM), val(val) {};
-	virtual void print(std::ostream& cout) const { cout << "NumAtom( " << val << " )"; }
+	virtual void print(std::ostream& cout) const { cout << val; }
 };
 
 class StringAtom: public Atom {
 public:
 	const std::string val;
 	explicit StringAtom(std::string s): Atom(Atom::STR), val(s) {};
-	virtual void print(std::ostream& cout) const { cout << "StringAtom( \"" << val << "\" )"; }
+	virtual void print(std::ostream& cout) const { cout << val; }
 };
 
 class SymbolAtom: public Atom {
 public:
 	const std::string name;
 	explicit SymbolAtom(std::string name): Atom(Atom::SYM), name(name) {}
-	virtual void print(std::ostream& cout) const { cout << "SymbolAtom( " << name << " )"; }
+	virtual void print(std::ostream& cout) const { cout << name; }
 };
 
 class ExpAtom: public Atom {
 public:
 	const Exp* exp;
 	explicit ExpAtom(Exp* exp): Atom(Atom::EXP), exp(exp) {}
-	virtual void print(std::ostream& cout) const { cout << "ExpAtom( "; _print(exp, cout); cout << " )"; }
+	virtual void print(std::ostream& cout) const { _print(exp, cout); }
 };
 
 // Exp
@@ -71,7 +71,7 @@ class AtomExp: public Exp {
 public:
 	const Atom* a;
 	explicit AtomExp(Atom* a): Exp(Exp::ATOM), a(a) {}
-	virtual void print(std::ostream& cout) const { cout << "AtomExp( "; _print(a, cout); cout << " )"; }
+	virtual void print(std::ostream& cout) const { _print(a, cout); }
 };
 
 class ListExp: public Exp {
@@ -79,12 +79,12 @@ public:
 	const List list;
 	explicit ListExp(const List& list): Exp(Exp::LIST), list(list) {}
 	virtual void print(std::ostream& cout) const {
-		cout << "ListExp( ";
+		cout << "(";
 		for(auto& e: list) {
 			e->print(cout);
 			cout << ' ';
 		}
-		cout << " )";
+		cout << ")";
 	}
 };
 
