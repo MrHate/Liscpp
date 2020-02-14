@@ -46,19 +46,23 @@ class Exp;
 typedef std::vector<Exp*> List;
 
 class Exp {
-	Atom* symbol;
+public:
+	virtual void print(std::ostream& cout) const = 0;
+};
+
+class AtomExp: public Exp {
+	Atom* a;
+public:
+	explicit AtomExp(Atom* a): a(a) {}
+	virtual void print(std::ostream& cout) const { a->print(cout); }
+};
+
+class ListExp: public Exp {
 	List list;
 public:
-	explicit Exp(Atom* symbol): symbol(symbol) {}
-	explicit Exp(Atom* oper, List list): symbol(oper), list(list) {}
-	void print(std::ostream& cout) {
-		if(list.empty()) {
-			symbol->print(cout);
-			return;
-		}
-		cout << "(";
-		symbol->print(cout);
-		cout << ' ';
+	explicit ListExp(const List& list): list(list) {}
+	virtual void print(std::ostream& cout) const {
+		cout << "( ";
 		for(auto& e: list) {
 			e->print(cout);
 			cout << ' ';

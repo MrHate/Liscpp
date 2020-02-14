@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	LISP::Parser parser(argv[1]);
-	parser.print();
+	parser.print(std::cout);
 
 	return 0;
 

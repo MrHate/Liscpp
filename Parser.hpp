@@ -1,3 +1,4 @@
+#include <iosfwd>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -5,7 +6,6 @@
 #include <vector>
 #include <stack>
 
-#include <iostream>
 #include "types.hpp"
 
 namespace LISP {
@@ -27,10 +27,10 @@ class Parser {
 	}
 
 	void parenthesize(std::vector<std::string>& tokens){
-		std::stack<Atom*> operStack;
+		std::stack<Exp*> operStack;
 		std::stack<List> listStack;
 
-		Atom* curOper = nullptr;
+		Exp* curOper = nullptr;
 		List curList;
 
 		for(std::string& token: tokens) 
@@ -43,7 +43,13 @@ class Parser {
 			}
 			else if (token == ")") {
 				assert(operStack.size() > 0);
-				Exp* pe = new Exp(curOper, curList);
+				Exp* pe = nullptr;
+				if(curList.size()) {
+					curList.insert(curList.begin(), curOper);
+					pe = new ListExp(curList);
+				}
+				else pe = curOper;
+
 				curOper = operStack.top(); operStack.pop();
 				curList = listStack.top(); listStack.pop();
 				curList.push_back(pe);
@@ -57,8 +63,8 @@ class Parser {
 				else 
 					a = new SymbolAtom(token);
 
-				if(!curOper) curOper = a;
-				else curList.push_back(new Exp(a));
+				if(!curOper) curOper = new AtomExp(a);
+				else curList.push_back(new AtomExp(a));
 			}
 		
 		exps = curList;
@@ -96,10 +102,12 @@ public:
 
 	}
 
-	void print () {
-		for(auto& e: exps) e->print(std::cout);
+	void print (std::ostream& cout) {
+		for(auto& e: exps) e->print(cout);
 	}
+
+	const List& get() const { return exps; }
 
 };
 
-}
+} // namespace LISP

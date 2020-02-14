@@ -2,3 +2,4 @@
 *.gch
 main
 *.in
+main.dSYM/
