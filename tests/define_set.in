@@ -1,0 +1,4 @@
+(define a 1)
+(println a)
+(set! a (quote (1 2 3)))
+(println a)

@@ -104,6 +104,12 @@ const Atom* eval_define(const List& list) {
 	return val;
 }
 
+const Atom* eval_set(const List& list) {
+	assert(list.size() == 3);
+	const std::string symbol = dynamic_cast<const SymbolAtom*>(list[1])->name;
+	assert(Env::getEnv().exist(symbol));
+	return eval_define(list);
+}
 
 const Atom* eval_proc(const std::string oper, const List& list) {
 	return Env::getEnv().lookup(oper)(list);
@@ -115,7 +121,7 @@ const Atom* eval_atom_front(const Atom* a) {
 
 	const std::string symbol = dynamic_cast<const SymbolAtom*>(a)->name;
 	//std::cout<<symbol<<std::endl;
-	if(symbol == "define" || symbol == "if" || Env::getEnv().exist(symbol)) return a;
+	if(symbol == "define" || symbol == "if" || symbol == "set!" || symbol == "lambda" || Env::getEnv().exist(symbol)) return a;
 	
 	return eval_atom(a);
 }
@@ -137,6 +143,9 @@ const Atom* eval_atom(const Atom* a) {
 	}
 }
 
+const Atom* eval_lambda(const List& list) {
+	return nullptr;
+}
 
 } // anonymous namespace
 
@@ -161,6 +170,8 @@ const Atom* eval(const Exp* e) {
 					const std::string oper = dynamic_cast<const SymbolAtom*>(head)->name;
 					if(oper == "if") return eval_if(list);
 					else if(oper == "define") return eval_define(list);
+					else if(oper == "set!") return eval_set(list);
+					else if(oper == "lambda") return eval_lambda(list);
 					else return eval_proc(oper, list);
 				}
 				else {

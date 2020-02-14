@@ -21,7 +21,7 @@ namespace LISP {
 
 class Atom {
 public:
-	enum { NONE = 0, NUM, STR, SYM, EXP, NUL };
+	enum { NONE = 0, NUM, STR, SYM, EXP, LAMBDA };
 	const int kind;
 
 	explicit Atom(int kind = 0): kind(kind) {}
