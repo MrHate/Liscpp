@@ -1,3 +1,6 @@
+#ifndef _LISP_INCLUDE_PARSER
+#define _LISP_INCLUDE_PARSER
+
 #include <iosfwd>
 #include <fstream>
 #include <sstream>
@@ -12,7 +15,7 @@ namespace LISP {
 
 class Parser {
 
-	List exps;
+	ListExp* root;
 
 	void tokenize(std::string& s){
 
@@ -67,7 +70,7 @@ class Parser {
 				else curList.push_back(new AtomExp(a));
 			}
 		
-		exps = curList;
+		root = new ListExp(curList);
 
 	}
 
@@ -102,12 +105,11 @@ public:
 
 	}
 
-	void print (std::ostream& cout) {
-		for(auto& e: exps) e->print(cout);
-	}
-
-	const List& get() const { return exps; }
+	void print (std::ostream& cout) { root->print(cout); }
+	const ListExp* get() const { return root; }
 
 };
 
 } // namespace LISP
+
+#endif

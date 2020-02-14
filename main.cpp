@@ -2,6 +2,7 @@
 #include <string>
 
 #include "Parser.hpp"
+#include "eval.hpp"
 
 using namespace std;
 
