@@ -1,0 +1,8 @@
+(println -1)
+(println (abs -1))
+(println 10)
+(println (abs 10))
+(println 0)
+(println (abs 0))
+(define n -1)
+(println (abs n))

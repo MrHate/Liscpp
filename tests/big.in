@@ -1,0 +1,28 @@
+(define r 10)
+(max (+ r (- 2 1))
+		 (* 4 1))
+(define res (max r 12))
+(if (> r res) (define k 10) (define k 1.5))
+(println k)
+
+(print (list? (1)))
+(println (list? 1))
+
+(print (number? 1))
+(println (number? ()))
+
+(print (symbol? k))
+(println (symbol? ()))
+
+(println (length (1 2 3)))
+
+(println (car (1 2 3)))
+
+(print (null? ()))
+(println (null? (1)))
+
+(println (= 3 5))
+
+(println (= 5 5))
+
+(println (abs -2))

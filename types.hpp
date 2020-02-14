@@ -21,7 +21,7 @@ namespace LISP {
 
 class Atom {
 public:
-	enum { NONE = 0, NUM, STR, SYM, EXP };
+	enum { NONE = 0, NUM, STR, SYM, EXP, NUL };
 	const int kind;
 
 	explicit Atom(int kind = 0): kind(kind) {}
@@ -79,7 +79,7 @@ public:
 	const List list;
 	explicit ListExp(const List& list): Exp(Exp::LIST), list(list) {}
 	virtual void print(std::ostream& cout) const {
-		cout << "(";
+		cout << "( ";
 		for(auto& e: list) {
 			e->print(cout);
 			cout << ' ';

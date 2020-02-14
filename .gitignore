@@ -1,5 +1,5 @@
 *.swp
 *.gch
 main
-*.in
+test/
 main.dSYM/

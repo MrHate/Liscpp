@@ -47,15 +47,20 @@ class Parser {
 			}
 			else if (token == ")") {
 				assert(listStack.size() > 0);
+
 				Exp* pe = new ListExp(curList);
 				curList = listStack.top(); listStack.pop();
 				curList.push_back(new ExpAtom(pe));
+
 			}
 			else {
 				Atom* a = nullptr;
 				if(token[0] == '"'){
+					assert(0);
 					//std::cout << token << std::endl;
-					a = new StringAtom(token.substr(1, token.size() - 2));
+					//std::string s = token;
+					//assert(s.find(1, '"') == s.size() - 1);
+					//a = new StringAtom(token.substr(1, token.size() - 2));
 				}
 				else if((token.size() > 1 && (token[0] == '-' || token[0] == '+')) || isdigit(token[0]))
 					a = new NumAtom(std::stod(token));
@@ -66,7 +71,7 @@ class Parser {
 				curList.push_back(a);
 			}
 		
-		//assert(curList.size() == 1);
+		assert(listStack.empty());
 		root = new ListExp(curList);
 
 	}

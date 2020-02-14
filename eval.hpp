@@ -63,6 +63,7 @@ class Env {
 		builtins["number?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::NUM); };
 		// TODO: procedure?
 		builtins["symbol?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::SYM); };
+		builtins["quote"] = [](const List& list) { return list[1]; };
 
 		name2exp.push_back(builtins);
 		name2exp.push_back(Dict());
@@ -98,7 +99,7 @@ const Atom* eval_if(const List& list) {
 const Atom* eval_define(const List& list) {
 	assert(list.size() == 3);
 	const std::string symbol = dynamic_cast<const SymbolAtom*>(list[1])->name;
-	const NumAtom* val = dynamic_cast<const NumAtom*>(eval_atom(list[2]));
+	const Atom* val = eval_atom(list[2]);
 	Env::getEnv().enter(symbol, [val](const List& list) { return val; });
 	return val;
 }
@@ -109,9 +110,11 @@ const Atom* eval_proc(const std::string oper, const List& list) {
 }
 
 const Atom* eval_atom_front(const Atom* a) {
+	//std::cout<<"front"<<std::endl;
 	if(a->kind != Atom::SYM) return eval_atom(a);
 
 	const std::string symbol = dynamic_cast<const SymbolAtom*>(a)->name;
+	//std::cout<<symbol<<std::endl;
 	if(symbol == "define" || symbol == "if" || Env::getEnv().exist(symbol)) return a;
 	
 	return eval_atom(a);
@@ -124,11 +127,10 @@ const Atom* eval_atom(const Atom* a) {
 				const std::string symbol = dynamic_cast<const SymbolAtom*>(a)->name;
 				return Env::getEnv().lookup(symbol)(List());
 			}
-		case Atom::NUM:
-			return a;
 		case Atom::EXP:
 			return eval(dynamic_cast<const ExpAtom*>(a)->exp);
 		case Atom::STR:
+		case Atom::NUM:
 			return a;
 		default:
 			assert(0);
