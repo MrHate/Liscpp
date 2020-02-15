@@ -6,5 +6,6 @@ inspired by these guys below:
 - https://github.com/klmr/lisp.cpp
 
 TODO:
-- Support string and lambda (it's not a problem to support string with old style method, but implementing lambda with tranditional C++ drives me crazy.
+- support string and 
+- support lambda :ballot_box_with_check:
 - or refactor with so called "modern C++"?

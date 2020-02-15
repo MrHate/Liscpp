@@ -100,7 +100,21 @@ const Atom* eval_define(const List& list) {
 	assert(list.size() == 3);
 	const std::string symbol = dynamic_cast<const SymbolAtom*>(list[1])->name;
 	const Atom* val = eval_atom(list[2]);
-	Env::getEnv().enter(symbol, [val](const List& list) { return val; });
+	if(val->kind == Atom::LAMBDA){
+		Env::getEnv().enter(symbol, [val](const List& list) { 
+				const LambdaAtom* la = dynamic_cast<const LambdaAtom*>(val);
+				Env::getEnv().beginScope();
+				for(int i=0;i<la->formals.size();++i){
+					auto v = eval_atom(list[i+1]);
+					Env::getEnv().enter(la->formals[i], [v](const List& list) { return v; });
+				}
+				auto res = eval_atom(la->body);
+				Env::getEnv().endScope();
+				return res;
+			});
+	}
+	else 
+		Env::getEnv().enter(symbol, [val](const List& list) { return val; });
 	return val;
 }
 
@@ -144,7 +158,18 @@ const Atom* eval_atom(const Atom* a) {
 }
 
 const Atom* eval_lambda(const List& list) {
-	return nullptr;
+	// 1. store the whole list into dictory
+	// 2. add formals into innermost dictory
+	// 3. eval as usual
+	// 4. remove the innermost dictory
+
+	assert(list.size() == 3);
+	assert(dynamic_cast<const SymbolAtom*>(list[0])->name == "lambda");
+	auto formals = LambdaAtom::LambdaFormals();
+	for(const Atom* a: dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list)
+		formals.push_back(dynamic_cast<const SymbolAtom*>(a)->name);
+	return new LambdaAtom(formals, list[2]);
+
 }
 
 } // anonymous namespace

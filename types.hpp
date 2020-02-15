@@ -17,6 +17,8 @@ namespace {
 
 namespace LISP {
 
+typedef std::vector<Atom*> List;
+
 // Atoms
 
 class Atom {
@@ -57,7 +59,6 @@ public:
 };
 
 // Exp
-typedef std::vector<Atom*> List;
 
 class Exp {
 public:
@@ -85,6 +86,24 @@ public:
 			cout << ' ';
 		}
 		cout << ")";
+	}
+};
+
+// lambda
+
+class LambdaAtom: public Atom {
+public:
+	using LambdaFormals = std::vector<std::string>;
+	const LambdaFormals formals;
+	const Atom* body;
+	explicit LambdaAtom(const LambdaFormals& formals, const Atom* body): Atom(Atom::LAMBDA), formals(formals), body(body) { }
+	virtual void print(std::ostream& cout) const { 
+		cout << "(lambda ("; 
+		for(auto& s: formals) 
+			cout << s << ' '; 
+		cout << ')';  
+		body->print(cout);
+		cout << ')';
 	}
 };
 
