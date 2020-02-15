@@ -1,6 +1,11 @@
-# A try on Lisp by C++
+# Liscpp
 
-inspired by these guys below:
+A try to implement a minimal lisp interpreter with C++.
+
+**This is just a solution but not a production**
+
+Inspired by these guys below:
+
 - https://norvig.com/lispy.html
 - https://maryrosecook.com/blog/post/little-lisp-interpreter
 - https://github.com/klmr/lisp.cpp
