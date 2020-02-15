@@ -30,10 +30,10 @@ class Parser {
 	}
 
 	void parenthesize(std::vector<std::string>& tokens){
-		std::cout << "Tokens: " << std::endl;
-		for(std::string& s: tokens)
-			std::cout << s << " | ";
-		std::cout << std::endl;
+		//std::cout << "Tokens: " << std::endl;
+		//for(std::string& s: tokens)
+		//  std::cout << s << " | ";
+		//std::cout << std::endl;
 
 		std::stack<List> listStack;
 

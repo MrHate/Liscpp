@@ -14,13 +14,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	LISP::Parser parser(argv[1]);
-	cout << "Parser.print: " << endl;
-	parser.print(std::cout);
-	cout << endl << "-------------------------------" << endl;
+	//cout << "Parser.print: " << endl;
+	//parser.print(std::cout);
+	//cout << endl << "-------------------------------" << endl;
 
 	const LISP::Atom* ret = LISP::eval(parser.get());
-	cout << "-------------------------------" << endl;
-	cout << "Result: " << endl;
+	//cout << "-------------------------------" << endl;
+	cout << "\033[0;32meval result:\033[0m" << endl;
 	ret->print(cout);
 	cout << endl;
 
