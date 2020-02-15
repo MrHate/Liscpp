@@ -9,3 +9,8 @@ TODO:
 - support string and 
 - support lambda :ballot_box_with_check:
 - or refactor with so called "modern C++"?
+
+Compile:
+
+$ `g++ main.cpp -g -Wall -std=c++11 -o main`
+

@@ -102,6 +102,8 @@ const Atom* eval_define(const List& list) {
 	const Atom* val = eval_atom(list[2]);
 	if(val->kind == Atom::LAMBDA){
 		Env::getEnv().enter(symbol, [val](const List& list) { 
+				if(list.empty()) return val;
+
 				const LambdaAtom* la = dynamic_cast<const LambdaAtom*>(val);
 				Env::getEnv().beginScope();
 				for(int i=0;i<la->formals.size();++i){

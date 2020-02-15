@@ -1,2 +1,3 @@
 (define add (lambda (a) (+ a a)))
 (println (add 2))
+(println add)
