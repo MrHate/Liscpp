@@ -1,0 +1,5 @@
+(println (procedure? 1))
+(println (procedure? abs))
+(println (procedure? (lambda (a) (+ a a))))
+(define me (lambda (a) (a)))
+(println (procedure? me))

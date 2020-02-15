@@ -7,3 +7,4 @@
 (println (apply (a) add))
 (println (+ 1 2 3 4))
 (println (+ 1 (- 5 3 -1) (* 2 2 2) (/ 4 2 2)))
+(println (list 1 2 3 5))

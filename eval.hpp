@@ -19,6 +19,7 @@ namespace {
 using namespace LISP;
 
 const Atom* eval_atom(const Atom*);
+const Atom* eval_atom_front(const Atom*);
 
 static int def_depth = 0;
 
@@ -91,13 +92,20 @@ class Env {
 		};
 		builtins["null?"] = [](const List& list) { return new NumAtom(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list.empty()); };
 		builtins["length"] = [](const List& list) { return new NumAtom(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list.size()); };
-		// TODO: list
+		builtins["list"] = [](const List& list) { return new ExpAtom(new ListExp(List(list.begin()+1, list.end()))); };
 		builtins["list?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::EXP); };
 		// TODO: map
 		builtins["print"] =  [](const List& list) { eval_atom(list[1])->print(std::cout); return new NumAtom(0); };
 		builtins["println"] =  [](const List& list) { eval_atom(list[1])->print(std::cout); std::cout << std::endl; return new NumAtom(0); };
 		builtins["number?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::NUM); };
-		// TODO: procedure?
+		builtins["procedure?"] = [](const List& list) {
+			if(list[1]->kind == Atom::LAMBDA) return new NumAtom(1);
+			auto a = eval_atom_front(list[1]);
+			if(a->kind == Atom::LAMBDA) return new NumAtom(1);
+			if(a->kind != Atom::SYM) return new NumAtom(0);
+			if(Env::getEnv().isBuiltin(dynamic_cast<const SymbolAtom*>(a)->name)) return new NumAtom(1);
+			return new NumAtom(eval_atom(a)->kind == Atom::LAMBDA);
+		};
 		builtins["symbol?"] =  [](const List& list) { return new NumAtom(eval_atom(list[1])->kind == Atom::SYM); };
 		builtins["quote"] = [](const List& list) { return list[1]; };
 
@@ -122,6 +130,11 @@ public:
 	const bool exist(std::string name) const {
 		for(auto i = name2exp.rbegin(); i != name2exp.rend(); ++i)
 			if(i->count(name)) return true;
+		return false;
+	}
+	const bool isBuiltin(std::string name) const {
+		for(auto& i: name2exp[0])
+			if(i.first == name) return true;
 		return false;
 	}
 };
