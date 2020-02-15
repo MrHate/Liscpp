@@ -39,7 +39,8 @@ class Parser {
 
 		List curList;
 
-		for(std::string& token: tokens) 
+		for(int i=0; i<tokens.size(); ++i){
+			const std::string& token = tokens[i];	
 			if(token == "(") {
 				listStack.push(curList);
 
@@ -56,11 +57,14 @@ class Parser {
 			else {
 				Atom* a = nullptr;
 				if(token[0] == '"'){
-					assert(0);
-					//std::cout << token << std::endl;
-					//std::string s = token;
-					//assert(s.find(1, '"') == s.size() - 1);
-					//a = new StringAtom(token.substr(1, token.size() - 2));
+					std::string s = token;
+					while(s.find('"', 1) == s.npos) {
+						assert(++i < tokens.size());
+						if(s.back() != '(' && s.back() != ')' && tokens[i].front() != '(' && tokens[i].front() != ')') s += ' ';
+						s += tokens[i];
+					}
+					assert(s.find('"', 1) == s.size() - 1);
+					a = new StringAtom(s.substr(1, s.size() - 2));
 				}
 				else if((token.size() > 1 && (token[0] == '-' || token[0] == '+')) || isdigit(token[0]))
 					a = new NumAtom(std::stod(token));
@@ -70,6 +74,7 @@ class Parser {
 
 				curList.push_back(a);
 			}
+		}
 		
 		assert(listStack.empty());
 		root = new ListExp(curList);

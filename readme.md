@@ -6,7 +6,7 @@ inspired by these guys below:
 - https://github.com/klmr/lisp.cpp
 
 TODO:
-- support string and 
+- support string and  :ballot_box_with_check:
 - support lambda :ballot_box_with_check:
 - or refactor with so called "modern C++"?
 
