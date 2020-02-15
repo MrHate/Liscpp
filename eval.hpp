@@ -30,10 +30,26 @@ class Env {
 
 	explicit Env() {
 		Dict builtins;
-		builtins["+"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val +  dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
-		builtins["-"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val -  dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
-		builtins["*"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val *  dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
-		builtins["/"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val /  dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
+		builtins["+"] =  [](const List& list) { 
+			double res = dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val;
+			for(int i=2; i<list.size(); ++i) res += dynamic_cast<const NumAtom*>(eval_atom(list[i]))->val;
+			return new NumAtom(res);
+	 	};
+		builtins["-"] =  [](const List& list) { 
+			double res = dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val;
+			for(int i=2; i<list.size(); ++i) res -= dynamic_cast<const NumAtom*>(eval_atom(list[i]))->val;
+			return new NumAtom(res);
+	 	};
+		builtins["*"] =  [](const List& list) { 
+			double res = dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val;
+			for(int i=2; i<list.size(); ++i) res *= dynamic_cast<const NumAtom*>(eval_atom(list[i]))->val;
+			return new NumAtom(res);
+	 	};
+		builtins["/"] =  [](const List& list) { 
+			double res = dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val;
+			for(int i=2; i<list.size(); ++i) res /= dynamic_cast<const NumAtom*>(eval_atom(list[i]))->val;
+			return new NumAtom(res);
+	 	};
 		builtins[">"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val >  dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
 		builtins["<"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val <  dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
 		builtins[">="] = [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val >= dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
@@ -47,12 +63,32 @@ class Env {
 		builtins["equal?"] =  [](const List& list) { return new NumAtom(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val == dynamic_cast<const NumAtom*>(eval_atom(list[2]))->val); };
 		builtins["not"] =  [](const List& list) { return new NumAtom(!(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val)); };
 		builtins["rount"] =  [](const List& list) { return new NumAtom(std::round(dynamic_cast<const NumAtom*>(eval_atom(list[1]))->val)); };
-		// TODO: append
-		// TODO: apply
-		// TODO: begin
+		builtins["append"] = [](const List& list) { 
+			auto& origin = dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[2])->exp)->list;
+			auto newlist = List(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list);
+			newlist.insert(newlist.end(), origin.begin(), origin.end());
+			return new ExpAtom(new ListExp(newlist));
+		};
+		builtins["apply"] = [](const List& list) {
+			auto formals = List(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list);
+			formals.insert(formals.begin(), list[2]);
+			return eval(new ListExp(formals));
+		};
+		builtins["begin"] = [](const List& list) {
+			for(int i=1;i<list.size()-1;++i) eval_atom(list[i]);
+			return eval_atom(list.back());
+		};
 		builtins["car"] = [](const List& list) { return dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list[0]; };
-		// TODO: cdr
-		// TODO: cons
+		builtins["cons"] = [](const List& list) { 
+			auto& origin = dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[2])->exp)->list;
+			auto newlist = List(origin);
+			newlist.insert(newlist.begin(), list[1]);
+			return new ExpAtom(new ListExp(newlist));
+		};
+		builtins["cdr"] = [](const List& list) { 
+			auto& origin = dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list;
+			return new ExpAtom(new ListExp(List(origin.begin()+1, origin.end())));
+		};
 		builtins["null?"] = [](const List& list) { return new NumAtom(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list.empty()); };
 		builtins["length"] = [](const List& list) { return new NumAtom(dynamic_cast<const ListExp*>(dynamic_cast<const ExpAtom*>(list[1])->exp)->list.size()); };
 		// TODO: list
@@ -75,7 +111,7 @@ public:
 		return _env;
 	}
 
-	void enter(std::string name, const Func f) { name2exp.back()[name] = f; }
+	void enter(std::string name, const Func f, bool isProc = false) { name2exp.back()[name] = f; }
 	void beginScope() { name2exp.push_back(Dict()); }
 	void endScope() { assert(name2exp.size() > 1); name2exp.resize(name2exp.size() - 1); }
 	const Func& lookup(std::string name) const {
